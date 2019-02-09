@@ -24,6 +24,19 @@ $app->get('/', function() {
 	$page->setTpl("index");
 });
 
+
+$app->get('/categories/:idcategory', function($idcategory) {
+
+	$category = new Category();
+	$category->get((int)$idcategory);
+
+	$page = new Page();
+	$page->setTpl("category", [
+		'category'=>$category->getValues(),
+		'products'=>[]
+	]);
+});
+
 /**************************************************************************************
  *  ADMINISTRAÇÃO
  **************************************************************************************/
@@ -115,25 +128,9 @@ $app->post("/admin/users/create", function(){
 	User::verifyLogin();
 
 	$user = new User();
-
 	$_POST["inadmin"] = (isset($_POST["inadmin"])) ? 1 : 0;
-
 	$_POST['despassword'] = User::getPasswordHash($_POST['despassword']);
-
-
-	/*
-	$_POST['despassword'] = password_hash($_POST["despassword"], PASSWORD_DEFAULT, [
-
-		"cost"=>12
-
-	]);
-	*/
-
-	//var_dump($_POST);
-	//exit;
-
 	$user->setData($_POST);
-
 	$user->save();
 
 	header("Location: /admin/users");
