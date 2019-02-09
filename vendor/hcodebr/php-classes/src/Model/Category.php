@@ -3,7 +3,6 @@
 namespace Hcode\Model; // local onde vc está
 use \Hcode\DB\Sql; // local do objeto que vc quer usar 
 use \Hcode\Model;  // local do objeto que vc quer usar 
-use \Hcode\Mailer; // local do objeto que vc quer usar 
 
 class Category extends Model {
 
