@@ -15,7 +15,6 @@ $app->get('/categories/:idcategory', function($idcategory) {
 
 	$pages = [];
 	for ($i=1; $i <= $pagination['pages']; $i++) { 
-		echo $i;
 		array_push($pages, [
 			'link'=>'/categories/'.$category->getidcategory().'?page='.$i,
 			'page'=>$i
