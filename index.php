@@ -8,6 +8,8 @@ $app = new Slim(); // cria definição de rotas
 
 $app->config('debug', true);
 
+require_once("functions.php");
+
 // SITE
 require_once("site.php");
 require_once("site-categories.php");
