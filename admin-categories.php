@@ -3,6 +3,7 @@
 use \Hcode\PageAdmin; // Administração
 use \Hcode\Model\User;
 use \Hcode\Model\Category;
+use \Hcode\Model\Product;
 
 /*****************************************/
 /** CATEGORIAS ***************************/
@@ -80,6 +81,54 @@ $app->post('/admin/categories/:idcategory', function($idcategory) {
 	$category->save();
 
 	header("Location: /admin/categories");
+	exit;
+});
+
+
+// TELA CATEGORIAS X PRODUTOS
+$app->get('/admin/categories/:idcategory/products', function($idcategory) {
+	User::verifyLogin();
+
+	$category = new Category();
+	$category->get((int)$idcategory);
+
+	$page = new PageAdmin();
+	$page->setTpl("categories-products", [
+		"category"=>$category->getValues(),
+		"productsRelated"=>$category->getProducts(),
+		"productsNotRelated"=>$category->getProducts(false)
+	]);
+});
+
+// ADD CATEGORIAS X PRODUTOS
+$app->get('/admin/categories/:idcategory/products/:idproduct/add', function($idcategory, $idproduct) {
+	User::verifyLogin();
+
+	$category = new Category();
+	$category->get((int)$idcategory);
+
+	$product = new Product();
+	$product->get((int)$idproduct);
+
+	$category->addProduct($product);
+
+	header("Location: /admin/categories/".$idcategory."/products");
+	exit;
+});
+
+// REMOVE CATEGORIAS X PRODUTOS
+$app->get('/admin/categories/:idcategory/products/:idproduct/remove', function($idcategory, $idproduct) {
+	User::verifyLogin();
+
+	$category = new Category();
+	$category->get((int)$idcategory);
+
+	$product = new Product();
+	$product->get((int)$idproduct);
+
+	$category->removeProduct($product);
+
+	header("Location: /admin/categories/".$idcategory."/products");
 	exit;
 });
 
