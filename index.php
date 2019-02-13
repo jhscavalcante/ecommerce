@@ -12,6 +12,7 @@ require_once("functions.php");
 
 // SITE
 require_once("site.php");
+require_once("site-cart.php");
 require_once("site-categories.php");
 require_once("site-products.php");
 
