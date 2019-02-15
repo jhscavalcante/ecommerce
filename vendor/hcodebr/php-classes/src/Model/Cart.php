@@ -3,6 +3,7 @@
 namespace Hcode\Model; // local onde vc está
 use \Hcode\DB\Sql; // local do objeto que vc quer usar 
 use \Hcode\Model;  // local do objeto que vc quer usar 
+use \Hcode\Model\Product;
 
 class Cart extends Model {
 
@@ -81,4 +82,60 @@ class Cart extends Model {
         $this->setData($results[0]);
     }
 
+    public function addProduct(Product $product){
+
+        $sql = new Sql();
+
+        $sql->query("INSERT INTO tb_cartsproducts (idcart, idproduct) VALUES (:idcart, :idproduct)", [
+            ':idcart'=> $this->getidcart(),
+            ':idproduct'=>$product->getidproduct()
+        ]);        
+    }
+
+    public function removeProduct(Product $product, $all = false){
+
+        $sql = new Sql();
+
+        if($all){
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW()  
+                         WHERE idcart = :idcart 
+                         AND idproduct = :idproduct  
+                         AND dtremoved IS NULL", [
+            ':idcart'=> $this->getidcart(),
+            ':idproduct'=>$product->getidproduct()
+            ]);        
+        }else {
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() 
+                         WHERE idcart = :idcart 
+                         AND idproduct = :idproduct 
+                         AND dtremoved IS NULL LIMIT 1", [
+            ':idcart'=> $this->getidcart(),
+            ':idproduct'=>$product->getidproduct()
+            ]);        
+        }
+
+    }
+
+
+    public function getProducts(){
+        $sql = new Sql();
+
+        $rows =  
+        $sql->select("SELECT b.idproduct, b.desproduct, b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl, 
+                             count(1) as nrqtd, sum(b.vlprice) as vltotal 
+                    FROM tb_cartsproducts a 
+                    INNER JOIN tb_products b ON 
+                            a.idproduct = b.idproduct 
+                    WHERE idcart = :idcart 
+                    AND dtremoved IS NULL 
+                    GROUP BY b.idproduct, b.desproduct, b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl
+                    ORDER BY b.desproduct", [
+                        ':idcart' => $this->getidcart()
+                    ]);
+
+        //var_dump($rows);
+        //exit;
+
+        return Product::checkList($rows);
+    }
 }
