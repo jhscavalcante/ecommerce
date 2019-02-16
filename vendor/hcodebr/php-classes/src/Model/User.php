@@ -118,6 +118,8 @@ class User extends Model {
 		));
         $this->setData($results[0]);
         
+        // atualiza as informações da sessão após o INSERT ou UPDATE (PRINCIPALMENTE)
+        $_SESSION[User::SESSION] = $this->getValues();
         //var_dump($results);
         //exit;
     }
@@ -265,6 +267,19 @@ class User extends Model {
     }
 
 
+    public static function checkLoginExist($login)
+	{
+		$sql = new Sql();
+		$results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
+			':deslogin'=>$login
+		]);
+		return (count($results) > 0);
+    }
+    
+    
+    /***************************************************************************/
+    /************************ MGS DE ERROR AND SUCCESS *************************/
+    /***************************************************************************/
     public static function setError($msg)
 	{
 		$_SESSION[User::ERROR] = $msg;
@@ -298,7 +313,29 @@ class User extends Model {
 	public static function clearSuccess()
 	{
 		$_SESSION[User::SUCCESS] = NULL;
+    }
+    
+
+    /***************************************************************************/
+    /******************** VALIDAÇÕES DO REGISTRO DE USUÁRIO ********************/
+    /***************************************************************************/
+    public static function setErrorRegister($msg)
+	{
+		$_SESSION[User::ERROR_REGISTER] = $msg;
+    }
+    
+	public static function getErrorRegister()
+	{
+		$msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER]) ? $_SESSION[User::ERROR_REGISTER] : '';
+		User::clearErrorRegister();
+		return $msg;
+    }
+    
+	public static function clearErrorRegister()
+	{
+		$_SESSION[User::ERROR_REGISTER] = NULL;
 	}
+
     
 }
 
