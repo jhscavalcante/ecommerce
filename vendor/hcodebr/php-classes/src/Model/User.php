@@ -11,6 +11,7 @@ class User extends Model {
     const SECRET = "HcodePhp7_Secret"; //deve ter pelo menos 16 caracteres
     const ERROR = "UserError";
 	const ERROR_REGISTER = "UserErrorRegister";
+	const ERROR_LINK_FORGOT_EXPIRED = "UserErrorLinkForgotExpired";
 	const SUCCESS = "UserSucesss";
 
     //protected $fields = [
@@ -62,7 +63,7 @@ class User extends Model {
 		)); 
 
         if(count($results) === 0){
-            throw new \Exception("Usuário não existe ou senha inválida.");
+            throw new \Exception("Usuários não existe ou senha inválida.");
         }
 
         $data = $results[0];
@@ -74,11 +75,14 @@ class User extends Model {
             //$data['desperson'] = utf8_encode($data['desperson']);
             $user->setData($data);
 
+            //var_dump($data);
+            //exit;
+
             $_SESSION[User::SESSION] = $user->getValues();
 
             return $user;
         }else{
-            throw new \Exception("Usuário inexistente ou senha inválida.");
+            throw new \Exception("Usuárioee inexistente ou senha inválida.");
         }
     }
 
@@ -180,7 +184,7 @@ class User extends Model {
         ));
     }
 
-    public function getForgot($email){
+    public function getForgot($email, $inadmin = true){
         $sql = new Sql();
 
         $results = $sql->select("SELECT * from tb_persons 
@@ -190,7 +194,7 @@ class User extends Model {
         ));
 
         if(count($results) === 0){
-           throw new \Exception("Não foi possível recuperar a senha"); 
+           throw new \Exception("E-mail inválido!"); 
         }else{
            $data = $results[0];
            $results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
@@ -213,7 +217,12 @@ class User extends Model {
                 $code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, 
                                             $dataRecovery["idrecovery"], MCRYPT_MODE_ECB
                             ));
-                $link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+
+                if($inadmin === true){
+                    $link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+                }else{
+                    $link = "http://www.hcodecommerce.com.br/forgot/reset?code=$code";
+                }                
 
                 $mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir Senha da Hcode Store",
                           "forgot", array(
@@ -313,6 +322,29 @@ class User extends Model {
 	public static function clearSuccess()
 	{
 		$_SESSION[User::SUCCESS] = NULL;
+    }
+
+
+    /***************************************************************************/
+    /************************ MGS DE ERROR FORGOT LINK *************************/
+    /***************************************************************************/
+    public static function setErrorLinkForgotExpired($msg)
+	{
+		$_SESSION[User::ERROR_LINK_FORGOT_EXPIRED] = $msg;
+    }
+    
+	public static function getErrorLinkForgotExpired()
+	{
+        //verifica se o erro está definido e se foi definido se ele não está vazio, ou seja se tem valor
+        $msg = (isset($_SESSION[User::ERROR_LINK_FORGOT_EXPIRED]) && 
+                $_SESSION[User::ERROR_LINK_FORGOT_EXPIRED]) ? $_SESSION[User::ERROR_LINK_FORGOT_EXPIRED] : '';
+		User::clearErrorLinkForgotExpired();
+		return $msg;
+    }
+    
+	public static function clearErrorLinkForgotExpired()
+	{
+		$_SESSION[User::ERROR_LINK_FORGOT_EXPIRED] = NULL;
     }
     
 

@@ -3,6 +3,9 @@ use \Hcode\Model\User;
 
 function formatPrice($vlPrice)
 {
+    // se o [ $vlPrice ] não for maior que zero, então recebe 0
+    if(!$vlPrice > 0) $vlPrice = 0;
+
     return number_format($vlPrice, 2, ",", ".");
 }
 

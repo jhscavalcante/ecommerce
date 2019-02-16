@@ -3,6 +3,10 @@
 use \Hcode\Page; // Site
 use \Hcode\Model\User;
 
+
+/*****************************************************/
+/*********************** LOGIN  **********************/
+/*****************************************************/
 $app->get("/login", function(){
 
     $page = new Page();
@@ -32,12 +36,20 @@ $app->post("/login", function(){
 	exit;
 });
 
+
+/*****************************************************/
+/*********************** LOGOUT  *********************/
+/*****************************************************/
 $app->get("/logout", function(){
 	User::logout();
 	header("Location: /login");
 	exit;
 });
 
+
+/*****************************************************/
+/********************** CADASTRO  ********************/
+/*****************************************************/
 $app->post("/register", function(){
 
 	// salva as informações enviadas pelo formulário, para ocorrer o erro eles possam ser exibidos novamente	
@@ -95,5 +107,83 @@ $app->post("/register", function(){
 	exit;
 });
 
+/*****************************************************/
+/***************** ESQUECEU A SENHA  *****************/
+/*****************************************************/
+$app->get("/forgot", function() {
+	$page = new Page();
+	$page->setTpl("forgot", [
+		'error'=>
+		(isset($_SESSION['UserError'])) ? $_SESSION['UserError'] : ''
+	]);	
+
+	$_SESSION['UserError'] = '';
+});
+
+$app->post("/forgot", function(){
+
+	try {
+		$user = User::getForgot($_POST["email"], false);
+	} catch(Exception $e) {
+		User::setError($e->getMessage());
+		header("Location: /forgot");
+		exit;
+	}
+
+	header("Location: /forgot/sent");
+	exit;
+});
+
+$app->get("/forgot/sent", function(){
+	$page = new Page();
+	$page->setTpl("forgot-sent");	
+});
+
+$app->get("/forgot/reset", function(){
+	//$user = User::validForgotDecrypt($_GET["code"]);
+
+	try {
+		$user = User::validForgotDecrypt($_GET["code"]);	
+	} catch(Exception $e) {
+		User::setErrorLinkForgotExpired($e->getMessage());
+		header("Location: /forgot/expired");
+		exit;
+    }
+
+	$page = new Page();
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+});
+
+$app->post("/forgot/reset", function(){
+
+	//try {
+		$forgot = User::validForgotDecrypt($_POST["code"]);	
+	//} catch(Exception $e) {
+	//	User::setErrorLinkForgotExpired($e->getMessage());
+	//	header("Location: /forgot/expired");
+	//	exit;
+    //}
+
+	User::setForgotUsed($forgot["idrecovery"]);
+	$user = new User();
+	$user->get((int)$forgot["iduser"]);
+	$password = $_POST["password"];
+	$user->setPassword($password);
+
+	$page = new Page();
+	$page->setTpl("forgot-reset-success");
+});
+
+$app->get("/forgot/expired", function(){
+	$page = new Page();
+	$page->setTpl("forgot-expired", [
+		'forgotLink'=>
+		(isset($_SESSION['UserErrorLinkForgotExpired'])) ? $_SESSION['UserErrorLinkForgotExpired'] : ''
+	]);
+	
+});
 
 ?>
