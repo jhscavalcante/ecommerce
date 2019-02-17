@@ -181,14 +181,14 @@ class Cart extends Model {
 				'nCdEmpresa'=>'',
 				'sDsSenha'=>'',
 				'nCdServico'=>'40010',
-				'sCepOrigem'=>'09853120',
+				'sCepOrigem'=>'69067000',
 				'sCepDestino'=>$nrzipcode,
 				'nVlPeso'=>$totals['vlweight'],
 				'nCdFormato'=>'1',
 				'nVlComprimento'=>$totals['vllength'],
 				'nVlAltura'=>$totals['vlheight'],
 				'nVlLargura'=>$totals['vlwidth'],
-				'nVlDiametro'=>'0',
+				'nVlDiametro'=>"0",
 				'sCdMaoPropria'=>'S',
 				'nVlValorDeclarado'=>$totals['vlprice'],
 				'sCdAvisoRecebimento'=>'S'
@@ -202,17 +202,31 @@ class Cart extends Model {
             // [ CONVERTE PARA JSON ] 
             // echo json_encode($xml);
             // exit;
-
+            
+            /**************************************************/
+            /********** CÁLCULO DO FRETE SITE CORREIOS ********/
+            /**************************************************/
 			$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
             $result = $xml->Servicos->cServico;
             
 			if ($result->MsgErro != '') {
-				Cart::setMsgError($result->MsgErro);
+				Cart::setMsgError((string)$result->MsgErro);
 			} else {
 				Cart::clearMsgError();
 			}
 			$this->setnrdays($result->PrazoEntrega);
-			$this->setvlfreight(Cart::formatValueToDecimal($result->Valor));
+            $this->setvlfreight(Cart::formatValueToDecimal($result->Valor));
+            /**/
+            
+            /**************************************************/
+            /********** CÁLCULO DO FRETE MANUAL ********/
+            /**************************************************/
+            /*
+            $result = '';
+            $this->setnrdays(0);
+            $this->setvlfreight(0);
+            */
+
 			$this->setdeszipcode($nrzipcode);
 			$this->save();
 			return $result;
@@ -269,6 +283,10 @@ class Cart extends Model {
 		$totals = $this->getProductsTotals();
 		$this->setvlsubtotal($totals['vlprice']);
 		$this->setvltotal($totals['vlprice'] + (float)$this->getvlfreight()); //vlr + frete
-	}
+    }
+    
+    public static function removeFromSession(){
+        $_SESSION[Cart::SESSION] = NULL;
+    }
 
 }
