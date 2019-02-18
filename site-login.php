@@ -2,6 +2,7 @@
 
 use \Hcode\Page; // Site
 use \Hcode\Model\User;
+use \Hcode\Model\Cart;
 
 
 /*****************************************************/

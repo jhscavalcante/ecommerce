@@ -13,15 +13,31 @@ class Cart extends Model {
     public static function getFromSession(){
         $cart = new Cart();
 
+        
+
         if(isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]['idcart'] > 0){
             $cart->get((int)$_SESSION[Cart::SESSION]['idcart']);
+
+            if(!(int)$_SESSION[Cart::SESSION]['iduser'] > 0){
+                $user = User::getFromSession();
+
+                $data['iduser'] = $user->getiduser();
+                $cart->setData($data);
+
+                //var_dump($cart);
+            }
+            
         }else {
+            
             $cart->getFromSessionID();
 
             if(!(int)$cart->getidcart() > 0 ){
                 $data = [
                     'dessessionid' => session_id()
                 ];
+
+                //var_dump(User::checkLogin(false));
+                //exit;
 
                 if(User::checkLogin(false)){
                     $user = User::getFromSession();
@@ -79,6 +95,10 @@ class Cart extends Model {
             ':vlfreight'=>$this->getvlfreight(),
             ':nrdays'=>$this->getnrdays()
         ]);
+
+        //var_dump($this);
+        //var_dump($results);
+        //exit;
 
         $this->setData($results[0]);
     }
@@ -206,7 +226,7 @@ class Cart extends Model {
             /**************************************************/
             /********** CÁLCULO DO FRETE SITE CORREIOS ********/
             /**************************************************/
-			$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
+			/*$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
             $result = $xml->Servicos->cServico;
             
 			if ($result->MsgErro != '') {
@@ -216,16 +236,15 @@ class Cart extends Model {
 			}
 			$this->setnrdays($result->PrazoEntrega);
             $this->setvlfreight(Cart::formatValueToDecimal($result->Valor));
-            /**/
+            */
             
             /**************************************************/
             /********** CÁLCULO DO FRETE MANUAL ********/
             /**************************************************/
-            /*
             $result = '';
             $this->setnrdays(0);
             $this->setvlfreight(0);
-            */
+            
 
 			$this->setdeszipcode($nrzipcode);
 			$this->save();
@@ -286,7 +305,10 @@ class Cart extends Model {
     }
     
     public static function removeFromSession(){
+        //var_dump($_SESSION);
+        //exit;
         $_SESSION[Cart::SESSION] = NULL;
     }
+    
 
 }

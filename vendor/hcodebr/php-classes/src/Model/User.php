@@ -22,7 +22,8 @@ class User extends Model {
 
         $user = new User();
 
-        if(isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] > 0 ){
+
+        if(isset($_SESSION[User::SESSION]) && ((int)$_SESSION[User::SESSION]['iduser'] > 0) ){            
             $user->setData($_SESSION[User::SESSION]);
         }
 
@@ -100,6 +101,8 @@ class User extends Model {
 
     public static function logout()
     {
+        //var_dump($_SESSION);
+        //exit;
         $_SESSION[User::SESSION] = NULL;
     }
 
