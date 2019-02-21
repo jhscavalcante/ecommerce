@@ -12,8 +12,8 @@ class Cart extends Model {
 
     public static function getFromSession(){
         $cart = new Cart();
-
         
+       
 
         if(isset($_SESSION[Cart::SESSION]) && (int)$_SESSION[Cart::SESSION]['idcart'] > 0){
             $cart->get((int)$_SESSION[Cart::SESSION]['idcart']);
@@ -26,15 +26,27 @@ class Cart extends Model {
 
                 //var_dump($cart);
             }
+
+            
+            //var_dump($cart);
+            //exit;
             
         }else {
             
+            
             $cart->getFromSessionID();
 
+            
+
             if(!(int)$cart->getidcart() > 0 ){
+
+                session_regenerate_id();
                 $data = [
+                    //'dessessionid' => session_id()
                     'dessessionid' => session_id()
                 ];
+
+               
 
                 //var_dump(User::checkLogin(false));
                 //exit;
@@ -45,7 +57,10 @@ class Cart extends Model {
                     $data['iduser'] = $user->getiduser();
                 }
 
+                
+
                 $cart->setData($data);
+               
                 $cart->save();
                 $cart->setToSession();
             }
@@ -62,9 +77,13 @@ class Cart extends Model {
     public function getFromSessionID(){
         $sql = new Sql();
 
-        $results = $sql->select("SELECT * FROM tb_carts WHERE dessessionid = :dessessionid", [
-            ':dessessionid' => session_id()
-        ]);
+        $results = $sql->select("SELECT t1.* 
+                                 FROM tb_carts t1 
+                                 WHERE  exists ( select 1 from tb_orders t2 
+                                                 WHERE t1.dessessionid = :dessessionid 
+                                                 and   USING(idcart) ", [
+                                 ':dessessionid' => session_id()
+                                ]);
 
         if(count($results) > 0 ){
             $this->setData($results[0]);    
@@ -226,7 +245,7 @@ class Cart extends Model {
             /**************************************************/
             /********** CÁLCULO DO FRETE SITE CORREIOS ********/
             /**************************************************/
-			/*$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
+			$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
             $result = $xml->Servicos->cServico;
             
 			if ($result->MsgErro != '') {
@@ -236,15 +255,16 @@ class Cart extends Model {
 			}
 			$this->setnrdays($result->PrazoEntrega);
             $this->setvlfreight(Cart::formatValueToDecimal($result->Valor));
-            */
+            /**/
             
             /**************************************************/
             /********** CÁLCULO DO FRETE MANUAL ********/
             /**************************************************/
+            /*
             $result = '';
             $this->setnrdays(0);
             $this->setvlfreight(0);
-            
+            */
 
 			$this->setdeszipcode($nrzipcode);
 			$this->save();

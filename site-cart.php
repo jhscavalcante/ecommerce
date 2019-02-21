@@ -174,6 +174,9 @@ $app->post("/checkout", function(){
 	]);
 	$order->save();
 
+	Cart::removeFromSession();
+	//unset($_SESSION['destroyed']);
+
 	header("Location: /order/".$order->getidorder());
 	
 	/*
