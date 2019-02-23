@@ -69,14 +69,13 @@ $app->get("/admin/orders", function(){
 
     User::verifyLogin();
 	
-	/*
 	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
     $page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
     
 	if ($search != '') {
-		$pagination = Order::getPageSearch($search, $page);
+		$pagination = Order::getPageSearch($search, $page, 5);
 	} else {
-		$pagination = Order::getPage($page);
+		$pagination = Order::getPage($page, 5);
     }
     
     $pages = [];
@@ -98,12 +97,7 @@ $app->get("/admin/orders", function(){
 		"search"=>$search,
 		"pages"=>$pages
 	]);
-	*/
 
-    $page = new PageAdmin();
-	$page->setTpl("orders", [
-		"orders"=>Order::listAll()
-	]);
 });
 
 ?>
