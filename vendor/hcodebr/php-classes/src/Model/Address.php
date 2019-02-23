@@ -36,13 +36,12 @@ class Address extends Model {
 	public function save()
 	{
 		$sql = new Sql();
-		//$results = $sql->select("CALL sp_addresses_save(:idaddress, :idperson, :desaddress, :desnumber, :descomplement, :descity, :desstate, :descountry, :deszipcode, :desdistrict)", [
-		$results = $sql->select("CALL sp_addresses_save(:idaddress, :idperson, :desaddress, 
+		$results = $sql->select("CALL sp_addresses_save(:idaddress, :idperson, :desaddress, :desnumber,
 		           :descomplement, :descity, :desstate, :descountry, :deszipcode, :desdistrict)", [
 			':idaddress'=>$this->getidaddress(),
 			':idperson'=>(int)$this->getidperson(),
 			':desaddress'=>$this->getdesaddress(),
-			//':desnumber'=>$this->getdesnumber(),
+			':desnumber'=>$this->getdesnumber(),
 			':descomplement'=>$this->getdescomplement(),
 			':descity'=>$this->getdescity(),
 			':desstate'=>$this->getdesstate(),
