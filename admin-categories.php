@@ -21,8 +21,6 @@ $app->get('/admin/categories', function() {
 	}else{
 		$pagination = Category::getPage($page, 5);
 	}
-
-	//$users = User::listAll();
 	
 	$pages = [];
 
